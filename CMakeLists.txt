@@ -22,6 +22,7 @@ endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 add_executable(${PROJECT_NAME} main.cpp)
 
 find_package(Vulkan REQUIRED)
+set(VK_LAYER_PATH "$ENV{VULKAN_SDK}/etc/vulkan/explicit_layer.d")
 
 # GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "GLFW lib only")
@@ -31,6 +32,12 @@ set(GLFW_BUILD_INSTALL OFF CACHE BOOL "GLFW lib only")
 add_subdirectory(vendor/glfw)
 
 # GLM
-target_include_directories(${PROJECT_NAME} PRIVATE "vendor/glm")
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        vendor/glm
+    PUBLIC
+        "$ENV{VULKAN_SDK}/include"
+)
 
+# target_link_directories(${PROJECT_NAME} PRIVATE $ENV{VULKAN_SDK}/lib)
 target_link_libraries(${PROJECT_NAME} glfw ${OPENGL_LIBRARIES} Vulkan::Vulkan)

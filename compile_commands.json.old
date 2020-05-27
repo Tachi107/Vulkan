@@ -1,0 +1,87 @@
+[
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build",
+  "command": "/usr/bin/c++   -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glm -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include   -std=c++20 -stdlib=libc++ -I/usr/lib/llvm-10/include/c++/v1 -O3 -fuse-ld=lld -flto=full   -o CMakeFiles/VulkanTachi.dir/main.cpp.o -c /home/tachi/OneDrive/Dev/Vulkan/main.cpp",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/main.cpp"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/context.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/context.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/context.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/init.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/init.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/init.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/input.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/input.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/input.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/monitor.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/monitor.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/monitor.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/vulkan.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/vulkan.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/vulkan.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/window.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/window.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/window.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/x11_init.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/x11_init.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/x11_init.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/x11_monitor.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/x11_monitor.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/x11_monitor.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/x11_window.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/x11_window.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/x11_window.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/xkb_unicode.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/xkb_unicode.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/xkb_unicode.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/posix_time.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/posix_time.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/posix_time.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/posix_thread.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/posix_thread.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/posix_thread.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/glx_context.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/glx_context.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/glx_context.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/egl_context.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/egl_context.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/egl_context.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/osmesa_context.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/osmesa_context.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/osmesa_context.c"
+},
+{
+  "directory": "/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src",
+  "command": "/usr/bin/cc -D_GLFW_USE_CONFIG_H -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/include -I/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src -I/home/tachi/OneDrive/Dev/Vulkan/build/vendor/glfw/src   -std=c11 -O3 -fuse-ld=lld -flto=full -fPIC   -Wall -std=gnu99 -o CMakeFiles/glfw.dir/linux_joystick.c.o   -c /home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/linux_joystick.c",
+  "file": "/home/tachi/OneDrive/Dev/Vulkan/vendor/glfw/src/linux_joystick.c"
+}
+]

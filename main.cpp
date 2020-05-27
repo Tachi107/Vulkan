@@ -10,11 +10,11 @@ int main() {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "Vulkan window", nullptr, nullptr);
 
-	uint32_t extensionCount;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 
-	std::cout << "paolo\n";
-	std::cout << extensionCount << " extensions supported\n";
+	uint32_t extensionCount;
+	vk::enumerateInstanceExtensionProperties(static_cast<char*>(nullptr), &extensionCount, nullptr);
+
+	std::cout << extensionCount << '\n';
 
 	glm::mat4 matrix;
 	glm::vec4 vec;
