@@ -4,3 +4,6 @@ build/
 # Clangd
 .clangd/
 compile_commands.json
+
+#VSCode
+.vscode/
