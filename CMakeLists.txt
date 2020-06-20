@@ -5,15 +5,17 @@ project(Vulkan)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -fuse-ld=lld -Wno-unused-command-line-argument")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++ -fuse-ld=lld -Wno-unused-command-line-argument")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
     if(CMAKE_BUILD_TYPE MATCHES Debug)
-        message("Debug mode")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -std=c11 -Og -g3 -fuse-ld=lld")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++20 -stdlib=libc++ -Og -g3 -fuse-ld=lld -Wall -Wextra -Wpedantic")
-        set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fuse-ld=lld")
+        # TODO: Check -g3 -g difference
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Og -g3")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og -g3 -Wall -Wextra -Wpedantic -Wno-unused-parameter")
     else()
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -O3 -fuse-ld=lld -flto=full")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++ -O3 -fuse-ld=lld -flto=full")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld -flto=full")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -flto -fwhole-program-vtables")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto -fwhole-program-vtables")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto -fwhole-program-vtables")
     endif(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
     set(CMAKE_CXX_STANDARD 20)
@@ -32,7 +34,6 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "GLFW lib only")
 set(GLFW_BUILD_INSTALL OFF CACHE BOOL "GLFW lib only")
 add_subdirectory(vendor/glfw)
 
-# GLM
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         vendor/glm
