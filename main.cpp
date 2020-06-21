@@ -123,13 +123,14 @@ private:
 	vk::DebugUtilsMessengerEXT debugMessenger;
 	vk::PhysicalDevice physicalDevice;
 	vk::Device device;
-	vk::Queue graphicsQueue;				// Automatically cleaned up when destroying device
+	vk::Queue graphicsQueue;						// Automatically cleaned up when destroying device
 	vk::Queue presentationQueue;
-	vk::SurfaceKHR surface;					// Basically the window
+	vk::SurfaceKHR surface;							// Basically the window
 	vk::SwapchainKHR swapchain;
-	std::vector<vk::Image> swapchainImages;	// Here I'll store the images in the swapchain. Automatically cleaned up when destroyng the swapchain
+	std::vector<vk::Image> swapchainImages;			// Here I'll store the images in the swapchain. Automatically cleaned up when destroyng the swapchain
 	vk::Format swapchainImageFormat;
 	vk::Extent2D swapchainExtent;
+	std::vector<vk::ImageView> swapchainImageViews;	// Necessary to visualize the vk::Images
 
 private:
 	void initWindow() {
@@ -146,6 +147,7 @@ private:
 		pickPhysicalDevice();
 		createLogicalDevice();
 		createSwapchain();
+		createImageViews();
 	}
 
 	void mainLoop() {
@@ -155,6 +157,9 @@ private:
 	}
 
 	void cleanup() {
+		for (auto imageView : swapchainImageViews) {
+			device.destroyImageView(imageView);
+		}
 		device.destroySwapchainKHR(swapchain);
 		device.destroy();
 		if constexpr (enableValidationLayers) {
@@ -224,7 +229,7 @@ private:
 			}
 		}
 		if (!glfwExtensionFound) {
-			std::cout << "Usupported extensions: ";
+			std::cout << "Unsupported extensions: ";
 			for (size_t i {0}; i < unsupportedExtensionsIndices.size() - 1; ++i) {
 				std::cout << glfwExtensions[unsupportedExtensionsIndices[i]] << ", ";
 			}
@@ -238,7 +243,7 @@ private:
 		std::vector availableLayers {vk::enumerateInstanceLayerProperties()};
 		for (const char* const layerName : validationLayers) {
 			bool layerFound {false};
-			for (const vk::LayerProperties& layerProperties : availableLayers) {
+			for (const auto& layerProperties : availableLayers) {
 				if (std::strcmp(layerName, layerProperties.layerName) == 0) {
 					layerFound = true;
 					break;
@@ -268,7 +273,7 @@ private:
 		const VkDebugUtilsMessengerCallbackDataEXT* const pCallbackData,
 		void* const pUserData
 		) {
-		std::cerr << "Validation layer: " << pCallbackData->pMessage << '\n';
+		std::cerr << "Validation layer: " << vk::to_string(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity)) << ": " << pCallbackData->pMessage << '\n';
 		return VK_FALSE;
 	}
 
@@ -287,11 +292,11 @@ private:
 	}
 
 	void pickPhysicalDevice() {
-		if (instance.enumeratePhysicalDevices().empty()) {
+		const std::vector physicalDevices {instance.enumeratePhysicalDevices()};
+		if (physicalDevices.empty()) {
 			throw std::runtime_error("Falied to find GPUs with Vulkan support");
 		}
 		else {
-			const std::vector physicalDevices {instance.enumeratePhysicalDevices()};
 			for (const auto& physicalDevice : physicalDevices) {
 				if (isPhysicalDeviceSuitable(physicalDevice)) {
 					this->physicalDevice = physicalDevice;
@@ -306,7 +311,7 @@ private:
 		}
 	}
 
-	[[nodiscard]] bool isPhysicalDeviceSuitable(const vk::PhysicalDevice physicalDevice) {
+	[[nodiscard]] bool isPhysicalDeviceSuitable(const vk::PhysicalDevice physicalDevice) const {
 		return findQueueFamilies(physicalDevice).isComplete() &&
 			   checkPhysicalDeviceExtensionSupport(physicalDevice) &&
 			   querySwapchainSupport(physicalDevice).isAdequate();
@@ -321,7 +326,7 @@ private:
 		}
 	};
 
-	[[nodiscard]] QueueFamilyIndices findQueueFamilies(const vk::PhysicalDevice physicalDevice) {
+	[[nodiscard]] QueueFamilyIndices findQueueFamilies(const vk::PhysicalDevice physicalDevice) const {
 		const std::vector queueFamilyProperties {physicalDevice.getQueueFamilyProperties()};
 		// i is the index of the queue
 		for (size_t i {0}; i < queueFamilyProperties.size(); ++i) {
@@ -405,7 +410,7 @@ private:
 		}
 	};
 
-	SwapchainDetails querySwapchainSupport(vk::PhysicalDevice physicalDevice) {
+	[[nodiscard]] SwapchainDetails querySwapchainSupport(vk::PhysicalDevice physicalDevice) const {
 		return SwapchainDetails {
 			physicalDevice.getSurfaceCapabilitiesKHR(surface),
 			physicalDevice.getSurfaceFormatsKHR(surface),
@@ -486,6 +491,27 @@ private:
 		swapchainImages = device.getSwapchainImagesKHR(swapchain);
 		swapchainImageFormat = surfaceFormat.format;
 		swapchainExtent = extent;
+	}
+	
+	void createImageViews() {
+		swapchainImageViews.resize(swapchainImages.size());
+
+		for (size_t i {0}; i < swapchainImageViews.size(); ++i) {
+			vk::ImageViewCreateInfo createInfo({},
+				swapchainImages[i],
+				vk::ImageViewType::e2D,
+				swapchainImageFormat,
+				{/*components*/},				// These allow me to swizzle around the color channels. Here I'm leaving everything normal
+				vk::ImageSubresourceRange(
+					vk::ImageAspectFlagBits::eColor,	// My images will be used as color targets
+					/*baseMipLevel*/ 	0,				// No mipmap
+					/*levelCount*/		1,
+					/*baseArrayLayer*/	0,				// Single layer, 'cause I'm not working with
+					/*layerCount*/		1				// a stereostopic 3D program
+				)
+			);
+			swapchainImageViews[i] = device.createImageView(createInfo);
+		}
 	}
 };
 
