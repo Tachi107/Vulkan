@@ -1,4 +1,5 @@
 // -I/usr/lib/llvm-10/include/c++/v1
+#include <string>
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 #include <array>
@@ -10,75 +11,13 @@
 #include <optional>
 #include <set>
 #include <limits>
-
-//#ifndef NDEBUG
-#if false
-static uint32_t allocCount{};
-static size_t totalAllocSize{};
-
-void* operator new(std::size_t size) {
-	if (size == 0) {
-		size = 1;
-	}
-	void* p;
-	while ((p = ::malloc(size)) == nullptr) {
-		// If malloc fails and there is a new_handler,
-		// call it to try free up memory.
-		std::new_handler nh = std::get_new_handler();
-		if (nh) {
-			nh();
-		}
-		else {
-			throw std::bad_alloc();
-		}
-	}
-	++allocCount;
-	totalAllocSize += size;
-	std::cerr << "Allocating " << size << " bytes, " << allocCount << " total allocations, " << totalAllocSize << " bytes allocated\n";
-	return p;
-}
-
-void* operator new(std::size_t size, std::align_val_t alignment)
-{
-	if (size == 0) {
-		size = 1;
-	}
-	if (static_cast<size_t>(alignment) < sizeof(void*)) {
-		alignment = std::align_val_t(sizeof(void*));
-	}
-	void* p;
-#if defined(_LIBCPP_MSVCRT_LIKE)
-	while ((p = _aligned_malloc(size, static_cast<size_t>(alignment))) == nullptr)
-#else
-	while (::posix_memalign(&p, static_cast<size_t>(alignment), size) != 0)
-#endif
-	{
-		// If posix_memalign fails and there is a new_handler,
-		// call it to try free up memory.
-		std::new_handler nh = std::get_new_handler();
-		if (nh) {
-			nh();
-		}
-		else {
-#ifndef _LIBCPP_NO_EXCEPTIONS
-			throw std::bad_alloc();
-#else
-			p = nullptr; // posix_memalign doesn't initialize 'p' on failure
-			break;
-#endif
-		}
-	}
-	++allocCount;
-	totalAllocSize += size;
-	std::cerr << "Allocating " << size << " bytes, " << allocCount << " total allocations, " << totalAllocSize << " bytes allocated\n";
-	return p;
-}
-#endif
+#include "new.hpp"
+#include <fstream>
 
 #ifdef NDEBUG
     static constexpr bool enableValidationLayers = false;
 #else
-    static constexpr bool enableValidationLayers = true;
+    static constexpr bool enableValidationLayers = false;
 #endif
 
 static const std::vector<const char*> validationLayers {"VK_LAYER_KHRONOS_validation"};
@@ -148,6 +87,7 @@ private:
 		createLogicalDevice();
 		createSwapchain();
 		createImageViews();
+		createGraphicsPipeline();
 	}
 
 	void mainLoop() {
@@ -175,7 +115,7 @@ private:
 		constexpr vk::ApplicationInfo applicationInfo(
 			"Vulkan", VK_MAKE_VERSION(0, 1, 0),
 			"No engine", VK_MAKE_VERSION(0, 0, 0),
-			VK_API_VERSION_1_1
+			VK_API_VERSION_1_2
 		);
 
 		const std::vector extensions {getRequiredExtensions()};
@@ -191,8 +131,8 @@ private:
 				debugCallback
 			);
 
-			vk::InstanceCreateInfo instanceCreateInfo(
-				{}, &applicationInfo,
+			vk::InstanceCreateInfo instanceCreateInfo({},
+				&applicationInfo,
 				validationLayers.size(), validationLayers.data(),
 				extensions.size(), extensions.data()
 			);
@@ -204,12 +144,13 @@ private:
 			instance = vk::createInstance(instanceCreateInfo);
 		}
 		else {
-			const vk::InstanceCreateInfo instanceCreateInfo(
-				{}, &applicationInfo,
-				0, nullptr,	// validation layers
-				extensions.size(), extensions.data()
+			instance = vk::createInstance(
+				vk::InstanceCreateInfo({},
+					&applicationInfo,
+					0, nullptr,	// validation layers
+					extensions.size(), extensions.data()
+				)
 			);
-			instance = vk::createInstance(instanceCreateInfo);
 		}
 	}
 
@@ -241,10 +182,10 @@ private:
 
 	[[nodiscard]] static bool checkValidationLayerSupport() {
 		std::vector availableLayers {vk::enumerateInstanceLayerProperties()};
-		for (const char* const layerName : validationLayers) {
+		for (const auto* const layerName : validationLayers) {
 			bool layerFound {false};
 			for (const auto& layerProperties : availableLayers) {
-				if (std::strcmp(layerName, layerProperties.layerName) == 0) {
+				if (std::strcmp(layerName, layerProperties.layerName.data()) == 0) {
 					layerFound = true;
 					break;
 				}
@@ -354,24 +295,32 @@ private:
 		const std::set<uint32_t> uniqueQueueFamilies {indices.graphicsFamily.value(), indices.presentationFamily.value()};
 		constexpr float queuePriority {1.0F};
 
+		queueCreateInfos.reserve(uniqueQueueFamilies.size());
 		for (const uint32_t queueFamily : uniqueQueueFamilies) {
-			const vk::DeviceQueueCreateInfo queueCreateInfo({}, queueFamily, 1, &queuePriority);
-			queueCreateInfos.push_back(queueCreateInfo);
+			queueCreateInfos.push_back(vk::DeviceQueueCreateInfo({}, queueFamily, 1, &queuePriority));
 		}
 
 		vk::PhysicalDeviceFeatures physicalDeviceFeatures;
-		vk::DeviceCreateInfo deviceCreateInfo(
-			{}, queueCreateInfos.size(), queueCreateInfos.data(),
-			{/*EnabledLayerCount*/}, {/*EnabledLayerNames*/},
-			requestedPhysicalDeviceExtensions.size(), requestedPhysicalDeviceExtensions.data(),
-			&physicalDeviceFeatures
-		);
-		if constexpr (enableValidationLayers) {
-			deviceCreateInfo.enabledLayerCount = validationLayers.size();
-			deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-		}
 
-		device = physicalDevice.createDevice(deviceCreateInfo);
+		device = physicalDevice.createDevice(
+			vk::DeviceCreateInfo({},
+				queueCreateInfos.size(), queueCreateInfos.data(),
+				[](){
+					if constexpr (enableValidationLayers) {
+						return validationLayers.size(); 
+					}
+					return 0;
+				}(),
+				[](){
+					if constexpr (enableValidationLayers) {
+						return validationLayers.data();
+					}
+					return nullptr;
+				}(),
+				requestedPhysicalDeviceExtensions.size(), requestedPhysicalDeviceExtensions.data(),
+				&physicalDeviceFeatures
+			)
+		);
 		graphicsQueue = device.getQueue(indices.graphicsFamily.value(), 0);
 		presentationQueue = device.getQueue(indices.presentationFamily.value(), 0);
 	}
@@ -393,17 +342,17 @@ private:
 		// i remove an extension from the set of required ones if that's already supported,
 		// and it is if the extension is present in the vector of available ones.
 		for (const auto& extension : availableExtensions) {
-			requiredExtensions.erase(extension.extensionName);
+			requiredExtensions.erase(extension.extensionName.data());
 		}
-		// If the set of required extension is empty, it means that all my required extensions
+		// If the set of required extension is empty, it means that all my requiresad extensions
 		// are supported by the physicalDevice
 		return requiredExtensions.empty();
 	}
 
 	struct SwapchainDetails {
-		vk::SurfaceCapabilitiesKHR capabilities;
 		std::vector<vk::SurfaceFormatKHR> formats;	// Color depth
 		std::vector<vk::PresentModeKHR> presentModes;	// Conditions for swapping images to the screen
+		vk::SurfaceCapabilitiesKHR capabilities;
 
 		[[nodiscard]] bool isAdequate() const {
 			return !formats.empty() && !presentModes.empty();
@@ -412,9 +361,9 @@ private:
 
 	[[nodiscard]] SwapchainDetails querySwapchainSupport(vk::PhysicalDevice physicalDevice) const {
 		return SwapchainDetails {
-			physicalDevice.getSurfaceCapabilitiesKHR(surface),
 			physicalDevice.getSurfaceFormatsKHR(surface),
-			physicalDevice.getSurfacePresentModesKHR(surface)
+			physicalDevice.getSurfacePresentModesKHR(surface),
+			physicalDevice.getSurfaceCapabilitiesKHR(surface)
 		};
 	}
 
@@ -477,7 +426,7 @@ private:
 			{/*oldSwapchain*/}
 		);
 
-		QueueFamilyIndices indices {findQueueFamilies(physicalDevice)};
+		const QueueFamilyIndices indices {findQueueFamilies(physicalDevice)};
 		// If I have two different queues they'll be able to access the image at the same time.
 		// This way, I have to specify which families will be using the swapchain
 		if (indices.graphicsFamily.value() != indices.presentationFamily.value()) {
@@ -497,21 +446,64 @@ private:
 		swapchainImageViews.resize(swapchainImages.size());
 
 		for (size_t i {0}; i < swapchainImageViews.size(); ++i) {
-			vk::ImageViewCreateInfo createInfo({},
-				swapchainImages[i],
-				vk::ImageViewType::e2D,
-				swapchainImageFormat,
-				{/*components*/},				// These allow me to swizzle around the color channels. Here I'm leaving everything normal
-				vk::ImageSubresourceRange(
-					vk::ImageAspectFlagBits::eColor,	// My images will be used as color targets
-					/*baseMipLevel*/ 	0,				// No mipmap
-					/*levelCount*/		1,
-					/*baseArrayLayer*/	0,				// Single layer, 'cause I'm not working with
-					/*layerCount*/		1				// a stereostopic 3D program
+			swapchainImageViews[i] = device.createImageView(
+				vk::ImageViewCreateInfo({},
+					swapchainImages[i],
+					vk::ImageViewType::e2D,
+					swapchainImageFormat,
+					{/*components*/},						// These allow me to swizzle around the color channels. Here I'm leaving everything normal
+					vk::ImageSubresourceRange(
+						vk::ImageAspectFlagBits::eColor,	// My images will be used as color targets
+						/*baseMipLevel*/ 	0,				// No mipmap
+						/*levelCount*/		1,
+						/*baseArrayLayer*/	0,				// Single layer, 'cause I'm not working with
+						/*layerCount*/		1				// a stereostopic 3D program
+					)
 				)
 			);
-			swapchainImageViews[i] = device.createImageView(createInfo);
 		}
+	}
+
+	void createGraphicsPipeline() {
+		// Shaders are created during the creation of the pipeline, every time.
+		// I can destroy them here, I don't need to make them class members
+		const vk::ShaderModule vertShaderModule {createShaderModule(readFile("shaders/vert.spv"))};
+		const vk::ShaderModule fragShaderModule {createShaderModule(readFile("shaders/frag.spv"))};
+
+		// Maybe std::array?
+		const std::pair shaderStageInfos {
+			vk::PipelineShaderStageCreateInfo({}, vk::ShaderStageFlagBits::eVertex, vertShaderModule, "main"),
+			vk::PipelineShaderStageCreateInfo({}, vk::ShaderStageFlagBits::eFragment, fragShaderModule, "main")
+		};
+
+		device.destroyShaderModule(vertShaderModule);
+		device.destroyShaderModule(fragShaderModule);
+	}
+
+	static std::vector<char> readFile(const std::string_view fileName) {
+		std::ifstream file(fileName, std::ios::ate | std::ios::binary);	//Opened at the end to know the file size
+		if (!file.is_open()) {
+			throw std::runtime_error("Failed to open file");
+		}
+
+		const auto fileSize {file.tellg()};
+		file.seekg(0);
+
+		std::vector<char> buffer(fileSize);
+		file.read(buffer.data(), fileSize);
+
+		file.close();
+		return buffer;
+	}
+
+	vk::ShaderModule createShaderModule(const std::vector<char>& code) {
+		return vk::ShaderModule {
+			device.createShaderModule(
+				vk::ShaderModuleCreateInfo({},
+					code.size(), reinterpret_cast<const uint32_t*>(code.data())
+				)
+			)
+		};
 	}
 };
 

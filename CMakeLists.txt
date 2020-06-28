@@ -11,7 +11,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(CMAKE_BUILD_TYPE MATCHES Debug)
         # TODO: Check -g3 -g difference
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Og -g3")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og -g3 -Wall -Wextra -Wpedantic -Wno-unused-parameter")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og -g3 -Wall -Wextra -Weverything -Wpedantic -Wno-unused-parameter -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-missing-prototypes -Wno-global-constructors -Wno-exit-time-destructors -Wno-shadow -Wno-shorten-64-to-32 -Wno-documentation -Wno-documentation-unknown-command")
     else()
         set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -flto -fwhole-program-vtables")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto -fwhole-program-vtables")
@@ -35,6 +35,7 @@ set(GLFW_BUILD_INSTALL OFF CACHE BOOL "GLFW lib only")
 add_subdirectory(vendor/glfw)
 
 target_include_directories(${PROJECT_NAME}
+    SYSTEM
     PRIVATE
         vendor/glm
     PUBLIC

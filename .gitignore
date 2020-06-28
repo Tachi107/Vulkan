@@ -6,5 +6,8 @@ build_release/
 .clangd/
 compile_commands.json
 
-#VSCode
+# VSCode
 .vscode/
+
+# Compiled shaders
+*.spv
