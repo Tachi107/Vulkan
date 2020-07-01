@@ -10,11 +10,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
     if(CMAKE_BUILD_TYPE MATCHES Debug)
         # TODO: Check -g3 -g difference
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Og -g3")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og -g3 -Wall -Wextra -Weverything -Wpedantic -Wno-unused-parameter -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-missing-prototypes -Wno-global-constructors -Wno-exit-time-destructors -Wno-shadow -Wno-shorten-64-to-32 -Wno-documentation -Wno-documentation-unknown-command")
+        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG} --optimize=g --debug=3 -gdwarf-4 -glldb -fstandalone-debug -fdebug-info-for-profiling -fdebug-macro -fdebug-default-version=4 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --optimize=g --debug=3 -gdwarf-4 -glldb -fstandalone-debug -fdebug-info-for-profiling -fdebug-macro -fdebug-default-version=4 -fno-omit-frame-pointer -fno-optimize-sibling-calls -Wall -Wextra -Weverything -Wpedantic -Wno-unused-parameter -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-missing-prototypes -Wno-global-constructors -Wno-exit-time-destructors -Wno-shadow -Wno-shorten-64-to-32 -Wno-documentation -Wno-documentation-unknown-command")
     else()
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -flto -fwhole-program-vtables")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto -fwhole-program-vtables")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} --optimize=3 -flto -fwhole-program-vtables")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --optimize=3 -flto -fwhole-program-vtables")
         set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto -fwhole-program-vtables")
     endif(CMAKE_BUILD_TYPE MATCHES Debug)
 else()
@@ -44,3 +44,9 @@ target_include_directories(${PROJECT_NAME}
 
 # target_link_directories(${PROJECT_NAME} PRIVATE $ENV{VULKAN_SDK}/lib)
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
+
+# -debug-info-kind=standalone
+# -dwarf-version=5
+# -debugger-tuning=lldb
+# -fsanitize=address 
+# -fsanitize=undefined -fsanitize=array-bounds -fsanitize=null -fsanitize=object-size -fsanitize=pointer-overflow

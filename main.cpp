@@ -1,5 +1,4 @@
 // -I/usr/lib/llvm-10/include/c++/v1
-#include <string>
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 #include <array>
@@ -17,11 +16,11 @@
 #ifdef NDEBUG
     static constexpr bool enableValidationLayers = false;
 #else
-    static constexpr bool enableValidationLayers = false;
+    static constexpr bool enableValidationLayers = true;
 #endif
 
-static const std::vector<const char*> validationLayers {"VK_LAYER_KHRONOS_validation"};
-static const std::vector<const char*> requestedPhysicalDeviceExtensions {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+static constexpr std::array validationLayers {"VK_LAYER_KHRONOS_validation"};
+static constexpr std::array requestedPhysicalDeviceExtensions {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 VkResult createDebugUtilsMessengerEXT(
 	const vk::Instance instance,
@@ -70,6 +69,7 @@ private:
 	vk::Format swapchainImageFormat;
 	vk::Extent2D swapchainExtent;
 	std::vector<vk::ImageView> swapchainImageViews;	// Necessary to visualize the vk::Images
+	vk::PipelineLayout pipelineLayout;
 
 private:
 	void initWindow() {
@@ -97,6 +97,7 @@ private:
 	}
 
 	void cleanup() {
+		device.destroyPipelineLayout(pipelineLayout);
 		for (auto imageView : swapchainImageViews) {
 			device.destroyImageView(imageView);
 		}
@@ -115,7 +116,7 @@ private:
 		constexpr vk::ApplicationInfo applicationInfo(
 			"Vulkan", VK_MAKE_VERSION(0, 1, 0),
 			"No engine", VK_MAKE_VERSION(0, 0, 0),
-			VK_API_VERSION_1_2
+			VK_API_VERSION_1_1
 		);
 
 		const std::vector extensions {getRequiredExtensions()};
@@ -182,7 +183,7 @@ private:
 
 	[[nodiscard]] static bool checkValidationLayerSupport() {
 		std::vector availableLayers {vk::enumerateInstanceLayerProperties()};
-		for (const auto* const layerName : validationLayers) {
+		for (const char* const layerName : validationLayers) {
 			bool layerFound {false};
 			for (const auto& layerProperties : availableLayers) {
 				if (std::strcmp(layerName, layerProperties.layerName.data()) == 0) {
@@ -212,7 +213,7 @@ private:
 		const VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		const VkDebugUtilsMessageTypeFlagsEXT messageType,
 		const VkDebugUtilsMessengerCallbackDataEXT* const pCallbackData,
-		void* const pUserData
+		void* const  /*pUserData*/
 		) {
 		std::cerr << "Validation layer: " << vk::to_string(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(messageSeverity)) << ": " << pCallbackData->pMessage << '\n';
 		return VK_FALSE;
@@ -309,13 +310,13 @@ private:
 					if constexpr (enableValidationLayers) {
 						return validationLayers.size(); 
 					}
-					return 0;
+					else return 0;
 				}(),
 				[](){
 					if constexpr (enableValidationLayers) {
 						return validationLayers.data();
 					}
-					return nullptr;
+					else return nullptr;
 				}(),
 				requestedPhysicalDeviceExtensions.size(), requestedPhysicalDeviceExtensions.data(),
 				&physicalDeviceFeatures
@@ -344,7 +345,7 @@ private:
 		for (const auto& extension : availableExtensions) {
 			requiredExtensions.erase(extension.extensionName.data());
 		}
-		// If the set of required extension is empty, it means that all my requiresad extensions
+		// If the set of required extension is empty, it means that all my required extensions
 		// are supported by the physicalDevice
 		return requiredExtensions.empty();
 	}
@@ -392,7 +393,6 @@ private:
 		}
 		else {
 			//vk::Extent2D actualExtent {windowWidth, windowHeight};
-			//std::cerr << actualExtent.width << ", " << actualExtent.height << '\n';
 			//actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
 			//actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
 			// TODO: Check if the line below works
@@ -422,7 +422,7 @@ private:
 			swapchainDetails.capabilities.currentTransform,
 			vk::CompositeAlphaFlagBitsKHR::eOpaque,				// Specifies if the alpha channel should be used for blending with other windows. This way I just ignore it
 			chooseSwapPresentMode(swapchainDetails.presentModes),
-			vk::Bool32(VK_TRUE),								// Enable clipping for best performance, but I'm unable to see the pixels obscured by a window on top
+			true,												// Enable clipping for best performance, but I'm unable to see the pixels obscured by a window on top
 			{/*oldSwapchain*/}
 		);
 
@@ -433,6 +433,7 @@ private:
 			//const std::array queueFamilyIndices {indices.graphicsFamily.value(), indices.presentationFamily.value()};
 			swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
 			swapchainCreateInfo.queueFamilyIndexCount = 2;
+			// TODO: Probably the scope of the std::array must be the same as when device.createSwapchainKHR(swapchainCreateInfo) gets called
 			swapchainCreateInfo.pQueueFamilyIndices = std::array{indices.graphicsFamily.value(), indices.presentationFamily.value()}.data();
 		}
 		
@@ -476,12 +477,58 @@ private:
 			vk::PipelineShaderStageCreateInfo({}, vk::ShaderStageFlagBits::eFragment, fragShaderModule, "main")
 		};
 
+		// Empty info since I'm not sending any vertex input (vertices are already hardcoded in the shader)
+		vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+
+		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo({},
+			vk::PrimitiveTopology::eTriangleList, true
+		);
+
+		vk::Viewport viewport(0.0F, 0.0F, static_cast<float>(swapchainExtent.width), static_cast<float>(swapchainExtent.height), 0.0F, 1.0F);
+		// Things outside of the scissor rectangle will not get rendered
+		vk::Rect2D scissor({0, 0}, swapchainExtent);
+		vk::PipelineViewportStateCreateInfo viewportState({},
+			1, &viewport, 1, &scissor
+		);
+
+		vk::PipelineRasterizationStateCreateInfo resterizerInfo({},
+			/*DepthClamp*/ false,				// Used to clamp instead of discard fragments beyond the planes (?)
+			/*RasterizerDiscard*/ false,		// If set to true, it just discards all the output to the framebuffer lol
+			vk::PolygonMode::eFill,
+			vk::CullModeFlagBits::eBack,		// To avoid rendering the back face of an object ('cause it is not visible anyway)
+			vk::FrontFace::eClockwise,			// Still didn't got this :/  Specifies the vertex order for faces to be considered front-facing
+			/*DepthBias*/ false, {}, {}, {},	// Here I could alter the depth values, used for shadow mapping
+			/*LineWidth*/ 1.0F					// For lines thicker than 1 I'd need the wideLines GPU feature
+		);
+
+		vk::PipelineMultisampleStateCreateInfo multisamplingInfo({}, vk::SampleCountFlagBits::e1, /*Enabled*/ false);
+
+		// Here I'm just disabling color blending. For example, an polygon with alpha = 1 and another with alpha = 0 will be rendered the same way
+		vk::PipelineColorBlendAttachmentState colorBlendAttachmentState(
+			false,
+			vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd,	// src and dest Color
+			vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd,	// src and dest Alpha
+			vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA	// To pass all the colors
+		);
+
+		vk::PipelineColorBlendStateCreateInfo colorBlendInfo({},
+			/*EnableLogicOp*/ false, vk::LogicOp::eCopy,
+			/*AttachmentCount*/ 1, &colorBlendAttachmentState
+		);
+
+		// Used to dynamically change a few things of the (almost immutable) pipeline
+		std::array dynamicStates {vk::DynamicState::eViewport, vk::DynamicState::eLineWidth};
+		vk::PipelineDynamicStateCreateInfo dynamicStateInfo({}, dynamicStates.size(), dynamicStates.data());
+
+		// Used to set the uniforms in the shaders
+		pipelineLayout = device.createPipelineLayout(vk::PipelineLayoutCreateInfo());
+
 		device.destroyShaderModule(vertShaderModule);
 		device.destroyShaderModule(fragShaderModule);
 	}
 
-	static std::vector<char> readFile(const std::string_view fileName) {
-		std::ifstream file(fileName, std::ios::ate | std::ios::binary);	//Opened at the end to know the file size
+	static std::vector<std::byte> readFile(const std::string_view fileName) {
+		std::ifstream file(fileName.data(), std::ios::ate | std::ios::binary);	// Opened at the end to know the file size
 		if (!file.is_open()) {
 			throw std::runtime_error("Failed to open file");
 		}
@@ -489,21 +536,19 @@ private:
 		const auto fileSize {file.tellg()};
 		file.seekg(0);
 
-		std::vector<char> buffer(fileSize);
-		file.read(buffer.data(), fileSize);
+		std::vector<std::byte> buffer(fileSize);
+		file.read(reinterpret_cast<char*>(buffer.data()), fileSize);
 
 		file.close();
 		return buffer;
 	}
 
-	vk::ShaderModule createShaderModule(const std::vector<char>& code) {
-		return vk::ShaderModule {
-			device.createShaderModule(
-				vk::ShaderModuleCreateInfo({},
-					code.size(), reinterpret_cast<const uint32_t*>(code.data())
-				)
+	vk::ShaderModule createShaderModule(const std::vector<std::byte>& code) {
+		return device.createShaderModule(
+			vk::ShaderModuleCreateInfo({},
+				code.size(), reinterpret_cast<const uint32_t*>(code.data())
 			)
-		};
+		);
 	}
 };
 
@@ -513,8 +558,9 @@ int main() {
 	try {
 		app.run();
 	} catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
+		std::clog << e.what() << '\n';
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
 }
+// std::cerr << "———————————————————————————————————————————————————————————————————————————————————\n";

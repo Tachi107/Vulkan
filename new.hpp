@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdint>
 
-#if false
+#if true
 static std::uint32_t allocCount{};
 static std::size_t totalAllocSize{};
 
